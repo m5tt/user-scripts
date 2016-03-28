@@ -1,0 +1,5 @@
+#!/bin/bash
+
+## Argument is desired country
+reflector --sort rate --save /etc/pacman.d/mirrorlist -c "$1" -f 5 -l 5
+

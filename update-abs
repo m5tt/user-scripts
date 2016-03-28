@@ -1,0 +1,43 @@
+#!/bin/bash
+
+## Simple script that shuffles $pkgvers
+## Works by getting all packages part of $custom_group then swiching out $pkver
+## Package becomes part of this group when user custom builds package and edits $pkgbuild
+
+pkgbuild='PKGBUILD'
+abs_root='/var/abs'
+build_root="$HOME/Builds"
+pkgver_pattern='pkgver='
+custom_group='custombuilt'
+
+update() 
+{
+    sudo abs ## no danger here because password isnt needed for this command
+
+    pacman -Qgq $custom_group | while read -r pkg
+    do
+        ## Build paths
+        ## pretty sure this could all be done in 1 sed if i knew what i was doing
+        repo=$(pacman -Si $pkg | head -n1 | awk -F':' '{print $2}' | sed 's/^ *//g') 
+        abs_path="$abs_root/$repo/$pkg"
+        build_path="$build_root/$pkg"
+           
+        cur_pkgver=$(sed -n "/$pkgver_pattern/p" "$build_path/$pkgbuild")
+        new_pkgver=$(sed -n "/$pkgver_pattern/p" "$abs_path/$pkgbuild")
+
+        if [ $cur_pkgver != $new_pkgver ] ; then
+            echo "Updating $pkg"
+
+            ## Copy everything but $pkgbuild
+            rsync -r --exclude=$pkgbuild $abs_path "$build_path"
+
+            sed -i "s/.*$pkgver_pattern.*/$new_pkgver/" "$build_path/$pkgbuild" ## search and replace
+
+            (cd $build_path; makepkg --syncdeps --cleanbuild --noconfirm --install --clean)
+            
+            echo "Updated $pkg"
+        fi
+    done
+}
+
+update

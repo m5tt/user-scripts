@@ -1,0 +1,40 @@
+#!/bin/bash
+
+mpd_cmds=('toggle' 'next' 'stop')
+spotify_cmds=('PlayPause' 'Next' 'Stop')
+
+music_cmd()
+{
+    if [ "$(qdbus | grep 'spotify')" != "" ] ; then 
+        ## use spotify
+        dbus-send --print-reply --dest=org.mpris.MediaPlayer2.spotify /org/mpris/MediaPlayer2 org.mpris.MediaPlayer2.Player.${spotify_cmds[$1]} > /dev/null
+    else
+        ## use mpd
+        mpc ${mpd_cmds[$1]} > /dev/null
+        pkill -SIGRTMIN+10 i3blocks
+    fi
+}
+
+
+if [ "$#" -ne "1" ] ; then
+    echo -e "Usage: {toggle|next}\n"
+    exit 1
+fi
+
+case "$1" in
+    toggle)
+        music_cmd 0
+        ;;
+    next)
+        music_cmd 1
+        ;;
+    stop)
+        music_cmd 2
+        ;;
+    *)
+        echo -e "Bad argument\n"
+        exit 1
+        ;;
+esac
+
+exit 0
