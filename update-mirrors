@@ -1,7 +1,7 @@
 #!/bin/bash
 
 ## Run on a timer to automate mirror updating
+## usage: update-mirrors <country>
 
-## Argument is desired country
 reflector --sort rate --save /etc/pacman.d/mirrorlist -c "$1" -f 5 -l 5
 
