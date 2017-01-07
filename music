@@ -1,5 +1,8 @@
 #!/bin/bash
 
+## Takes a command and sends it either to mpd or spotify
+## depending on which is running
+
 mpd_cmds=('toggle' 'next' 'stop')
 spotify_cmds=('PlayPause' 'Next' 'Stop')
 

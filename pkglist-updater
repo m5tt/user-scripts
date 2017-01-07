@@ -1,0 +1,7 @@
+#!/bin/bash
+
+# Run by a systemd timer
+
+FILE='backup/files/package-list-main.txt'
+
+pacman -Qe | ssh server "cat - > $FILE"

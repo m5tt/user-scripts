@@ -1,0 +1,12 @@
+#!/bin/bash
+
+## adds a confirmation for poweroff/reboot
+
+type_indice=$1 ## 0 = poweroff - 1 = reboot
+types=('poweroff' 'reboot')
+
+read -n1 -p "${types[type_indice]}? [y/n]: " yn
+case $yn in
+    [Yy]* ) /bin/${types[type_indice]};;
+    * ) echo "";;
+esac
