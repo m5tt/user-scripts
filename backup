@@ -1,30 +1,42 @@
 #!/bin/bash
 
-## Custom, kinda generic backup script using rsync and ssh
+## small custom backup script using rsync and ssh
+## usage: backup <user> 
+## requires config dir /home/<user>/.backup
+
+
+if [ $# -eq 0 ] ; then
+    echo "Missing argument"
+    exit 1
+fi
 
 ## Constants
-SRC="/"
-USER_HOME="/home/matt" ## Run as root so cant use $HOME and want to keep configs local
-BACKUP_DIR="$USER_HOME/.backup"
-LOG_FILE="$BACKUP_DIR/backup.log"
-CONFIG_FILE="$BACKUP_DIR/backup.config"
-PREV_BACKUP="$BACKUP_DIR/prevbackup.txt"
-EXCLUDES_FILE="$BACKUP_DIR/excludes.txt"
+USER=$1
+SRC="/"                             ## where to start backing up
+USER_HOME="/home/$USER"             ## run as root so cant use $HOME and want to keep configs local
+BACKUP_CONFIG_DIR="$USER_HOME/.backup"   
+LOG_FILE="$BACKUP_CONFIG_DIR/backup.log"
+CONFIG_FILE="$BACKUP_CONFIG_DIR/backup.config"
+PREV_BACKUP="$BACKUP_CONFIG_DIR/prevbackup.txt"
+EXCLUDES_FILE="$BACKUP_CONFIG_DIR/excludes.txt"
 KEY_FILE="$USER_HOME/.ssh/id_rsa"
 
-EXTRA_OPTS=$1
-
-## Error checking: make sure backup 
-## conf dir exists, that there root,
-## conf files exist and that theres internet
+## Error checking: make sure backup conf dir exists, 
 if [ ! -d $BACKUP_DIR ] ; then
+    echo "Backup directory doesnt exist"
 	exit 1
 fi
 
+## that there root
 if [ "$EUID" -ne 0 ] ; then
+	echo "Error: No root, exiting"
 	echo "Error: No root, exiting" >> $LOG_FILE
 	exit 1
-elif [ ! -f $KEY_FILE ] || [ ! -f $CONFIG_FILE ] ; then
+fi
+
+## and that the key file and config file are present
+if [ ! -f $KEY_FILE ] || [ ! -f $CONFIG_FILE ] ; then
+	echo "Error: missing files, exiting"
 	echo "Error: missing files, exiting" >> $LOG_FILE
 	exit 1
 fi
@@ -36,7 +48,6 @@ if [ $? -ne 0 ] ; then
 	echo "No internet connection, exiting" >> $LOG_FILE
 	exit 1
 fi
-
 
 ## Perform backup
 # TODO: use full timestamp instead of just date
@@ -53,9 +64,9 @@ echo "Backup started: $today" >> $LOG_FILE
 ## quick and dirty config file parsing
 source $CONFIG_FILE
 
-dest="$user@$server_ip:$dest_dir/$today"
+dest="$remote_user@$server_ip:$dest_dir/$today"
 ssh="ssh -p $port -i $KEY_FILE"
-opts="-aA --delete --links --partial --log-file=$LOG_FILE --exclude-from=$EXCLUDES_FILE --link-dest=$prev_backup $EXTRA_OPTS"
+opts="-aA --delete --links --partial --log-file=$LOG_FILE --exclude-from=$EXCLUDES_FILE --link-dest=$prev_backup"
 
 echo "Using command: rsync $opts -e $ssh $SRC $dest" >> $LOG_FILE
 
