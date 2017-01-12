@@ -20,4 +20,4 @@ owm = pyowm.OWM(key)
 weather = owm.weather_at_place(place).get_weather()
 temperature = str(weather.get_temperature('celsius')['temp'])
 
-print(temperature + ' ' + weather.get_status())
+print(' ' + temperature + ' ' + weather.get_status())
