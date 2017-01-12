@@ -21,6 +21,8 @@ PREV_BACKUP="$BACKUP_CONFIG_DIR/prevbackup.txt"
 EXCLUDES_FILE="$BACKUP_CONFIG_DIR/excludes.txt"
 KEY_FILE="$USER_HOME/.ssh/id_rsa"
 
+REMOTE_FULL_BACKUP_DIR='/home/vividek/backup/main'
+
 ## Error checking: make sure backup conf dir exists, 
 if [ ! -d $BACKUP_DIR ] ; then
     echo "Backup directory doesnt exist"
@@ -76,5 +78,7 @@ if [ $? -eq 0 ] ; then
     echo "Started: $today" >> $LOG_FILE
     echo "Finished: $(date +%F-%T)" >> $LOG_FILE
 else
-	echo "Backup failed: $today" >> $LOG_FILE
+    # delete failed backup - use trash-put cause its safer and why not
+    `ssh -p $port -i $KEY_FILE $remote_user@$server_ip trash-put $dest_dir/$today/`
+    echo "Backup failed: $today" >> $LOG_FILE
 fi

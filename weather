@@ -1,0 +1,23 @@
+#!/bin/env python
+
+import os
+import sys
+import pyowm
+
+CONFIG_DIR = '.config'
+CONFIG_FILE_DIR = 'weather'
+CONFIG_FILE = 'config'
+
+KEY_FILE = os.path.join(
+        os.path.expanduser('~'),
+        CONFIG_DIR, CONFIG_FILE_DIR, CONFIG_FILE)
+
+with open(KEY_FILE, 'r') as key_fh:
+    key = key_fh.readline().strip()
+    place = key_fh.readline().strip()
+
+owm = pyowm.OWM(key)
+weather = owm.weather_at_place(place).get_weather()
+temperature = str(weather.get_temperature('celsius')['temp'])
+
+print(temperature + ' ' + weather.get_status())
