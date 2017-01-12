@@ -49,10 +49,6 @@ if [ $? -ne 0 ] ; then
 	exit 1
 fi
 
-## Perform backup
-# TODO: use full timestamp instead of just date
-
-#today=`date -I` ## This will be the name of the new backup dir
 today=`date +%F-%T`
 
 ## Get most recent backup name for hardlinking
