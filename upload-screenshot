@@ -1,0 +1,4 @@
+#!/bin/bash
+
+maim -i $(xdotool getactivewindow) ~/Media/Images/Screenshots/$(date +%F-%T).png
+cliupl --img-file ~/Media/Images/Screenshots/$(date +%F-%T).png --site tiikoni
