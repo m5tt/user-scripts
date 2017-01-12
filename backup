@@ -41,8 +41,8 @@ if [ ! -f $KEY_FILE ] || [ ! -f $CONFIG_FILE ] ; then
 	exit 1
 fi
 
-## Change to check that were on network and server is up
-## TODO: make this check home network as well
+## Change to check that were on network
+## TODO: make this check server is up and on home network as well
 wget -q --tries=10 --timeout=30 --spider -O - http://google.com > /dev/null
 if [ $? -ne 0 ] ; then
 	echo "No internet connection, exiting" >> $LOG_FILE
@@ -52,7 +52,8 @@ fi
 ## Perform backup
 # TODO: use full timestamp instead of just date
 
-today=`date -I` ## This will be the name of the new backup dir
+#today=`date -I` ## This will be the name of the new backup dir
+today=`date +%F-%T`
 
 ## Get most recent backup name for hardlinking
 ## and for differential
@@ -70,11 +71,14 @@ opts="-aA --delete --links --partial --log-file=$LOG_FILE --exclude-from=$EXCLUD
 
 echo "Using command: rsync $opts -e $ssh $SRC $dest" >> $LOG_FILE
 
+# finally run backup
 rsync $opts -e "$ssh" $SRC $dest
 
 if [ $? -eq 0 ] ; then
-	echo $today > $PREV_BACKUP
-	echo "Successful backup: $today" >> $LOG_FILE
+	echo $today > $PREV_BACKUP      # update prev backup
+	echo "Successful backup:" >> $LOG_FILE
+    echo "Started: $today" >> $LOG_FILE
+    echo "Finished: $(date +%F-%T)" >> $LOG_FILE
 else
 	echo "Backup failed: $today" >> $LOG_FILE
 fi
