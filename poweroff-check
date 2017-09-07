@@ -1,6 +1,6 @@
 #!/bin/bash
 
-## adds a confirmation for poweroff/reboot
+## adds a confirmation (y/n?) for poweroff/reboot
 
 type_indice=$1 ## 0 = poweroff - 1 = reboot
 types=('poweroff' 'reboot')
